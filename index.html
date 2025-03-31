@@ -14,25 +14,44 @@
     <script type="text/babel">
       const { useState } = React;
 
+      function Modal({
+        title,
+        content,
+        show = false,
+        onClose = () => {},
+        onConfirm = () => {},
+      }) {
+        return (
+          show &&
+          ReactDOM.createPortal(
+            <div className="modal-container">
+              <div className="modal">
+                <h2>{title}</h2>
+                <p>{content}</p>
+                <button onClick={onClose}>Annulla</button>
+                <button onClick={onConfirm}>Conferma</button>
+              </div>
+            </div>,
+            document.body
+          )
+        );
+      }
+
       const ReactApp = () => {
         const [animals, setAnimals] = useState([]);
-        const animalsChoices = [
-          "Cane",
-          "Gatto",
-          "Pappagallo",
-          "Cavallo",
-          "Panda",
-        ];
+        const [show, setShow] = useState(false);
+        const [animalName, setAnimalName] = useState("");
 
         const addAnimal = () => {
-          const randomAnimal =
-            animalsChoices[Math.floor(Math.random() * animalsChoices.length)];
-          setAnimals((prevAnimals) => [...prevAnimals, randomAnimal]);
+          if (!animalName) return;
+          setAnimals((curr) => [...curr, animalName]);
+          setAnimalName("");
+          setShow(false);
         };
 
         return (
           <>
-            <button onClick={addAnimal}>Aggiungi Animale</button>
+            <button onClick={() => setShow(true)}>Aggiungi Animale</button>
             <details>
               <summary>Animali</summary>
               <ul>
@@ -41,18 +60,25 @@
                 ))}
               </ul>
             </details>
+            <Modal
+              show={show}
+              onClose={() => setShow(false)}
+              title="Aggiungi animale"
+              content={
+                <input
+                  type="text"
+                  value={animalName}
+                  onChange={(e) => setAnimalName(e.target.value)}
+                />
+              }
+              onConfirm={addAnimal}
+            />
           </>
         );
       };
 
-      ReactDOM.render(<ReactApp />, document.getElementById("root"));
-    </script>
-
-    <script type="text/babel">
       const { createRoot } = ReactDOM;
-
       const listaAnimali = document.querySelector(".lista-animali");
-
       const root = createRoot(listaAnimali);
       root.render(<ReactApp />);
     </script>
